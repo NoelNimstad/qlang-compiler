@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include "token.h"
 #include "tokenize.h"
+#include "lexer.h"
 
 // Qlang struct
 struct qlangStruct
@@ -16,6 +17,7 @@ struct qlangStruct
     char *fileContents;
     unsigned int line, column;
     struct token *tokens;
+    struct node *head;
 };
 /*
     The qlang struct will contain everything
@@ -42,6 +44,7 @@ struct qlangStruct
 void debugPrintTokens(struct qlangStruct *qlang);
 
 // Cleanup
+void freeNode(struct node *head);
 void destroyQlangStruct(struct qlangStruct *qlang);
 
 // Main process (to process some file)

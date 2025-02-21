@@ -20,6 +20,9 @@ void debugPrintTokens(struct qlangStruct *qlang)
 			case TOKEN_OPERATOR_ASSIGN:
 				printf("OPERATOR_ASSIGN");
 				break;
+			case TOKEN_OPERATOR_WEQUAL:
+				printf("OPERATOR_WEAK_ASSIGN");
+				break;
 			case TOKEN_VALUE_INT:
 				printf("INT(%d)", currentToken->value.integer);
 				break;
@@ -47,6 +50,28 @@ void debugPrintTokens(struct qlangStruct *qlang)
 	printf(COLOR_GREEN "\tEND_OF_FILE (%d tokens)\n" COLOR_RESET, i + 1);
 }
 
+void freeNode(struct node *head)
+{
+    if(head == NULL) return;
+
+    if(head->children != NULL)
+    {
+        for(unsigned int i = 0; i < head->childCount; i++)
+        {
+            freeNode(head->children[i]);
+        }
+        free(head->children);
+    }
+
+    if(head->type == NODE_VALUE_STRING && head->value.string != NULL)
+    {
+        free(head->value.string);
+    }
+
+    freeNode(head->next);
+    free(head);
+}
+
 void destroyQlangStruct(struct qlangStruct *qlang)
 {
     free(qlang->fileContents);
@@ -59,6 +84,8 @@ void destroyQlangStruct(struct qlangStruct *qlang)
         }
     }
 	free(qlang->tokens);
+	
+	free(qlang->head);
 }
 
 void processFile(const char *path)

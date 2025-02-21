@@ -103,6 +103,14 @@ struct token *generateTokens(char *source)
                 currentToken->type = TOKEN_SEMI_COLON;
                 currentToken++;
                 break;
+            case '?':
+                if(PEEK(currentCharacter) == '=')
+                {
+                    currentCharacter++;
+                    currentToken->type = TOKEN_OPERATOR_WEQUAL;
+                    currentToken++;
+                }
+                break;
             case '=':
                 currentToken->type = TOKEN_OPERATOR_ASSIGN;
                 currentToken++;
