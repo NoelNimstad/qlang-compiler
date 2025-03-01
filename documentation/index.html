@@ -49,11 +49,11 @@
                 wequal: `
 <h2>Opperator: ?= <span class="comment">/</span> wequal</h2>
 <p>The wequal operator functions identically to the normal <a onclick="navigate('assign')">assign operator</a> except it defaults to a mutable variable.</p>
-<div class="code">int a = 0;
-int b ?= 0;
+<div class="code">int a = 0; <span class="comment">// Immutable</span>
+int b ?= 0; <span class="comment">// Mutable</span>
 
 <span class="error">a =</span> 1; <span class="comment">// Error, a is by default immutable</span>
-b = 1;
+b = 1; <span class="comment">// Ok</span>
 </div>
 <p>The wequal operator is therefore identical to adding a @mut modifier.</p>
 <div class="code">int b ?= 0; <span class="comment">// @mut int b = 0;</span>
