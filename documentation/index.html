@@ -3,12 +3,13 @@
     <head>
         <title>Qlang</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <link rel="icon" href="q.svg" sizes="any" type="image/svg+xml">
     </head>
     <body>
         <main>
             <h1>Qlang documentation</h1>
-            <p>Q (pronunced Queue) is a superset of the C programing language, which compiles back down to C.</p>
+            <p>Q (pronunced Queue) is a superset of the C programing language with some additional features (such as immutability by default, @ modifiers and a module system) which then compiles back down to C.</p>
             <div class="center">
                 <div class="table">
                     <ul>
@@ -45,7 +46,7 @@
             {
                 wequal: `
 <h2>Opperator: ?= <span class="comment">/</span> wequal</h2>
-<p>The wequal operator functions identically to the normal assign operator except it defaults to a mutable variable.</p>
+<p>The wequal operator functions identically to the normal <a onclick="navigate('assign')">assign operator</a> except it defaults to a mutable variable.</p>
 <div class="code">int a = 0;
 int b ?= 0;
 
@@ -54,24 +55,39 @@ b = 1;
 </div>
 <p>The wequal operator is therefore identical to adding a @mut modifier.</p>
 <div class="code">int b ?= 0; <span class="comment">// @mut int b = 0;</span>
+</div>`,
+                spread: `
+<h2>Operator: .. <span class="comment">/</span> spread</h2>
+<p>The spread operator generates an array of numbers between two values, with increment 1. The syntax is as follows:
+<div class="code"><span class="comment">// Calculated at compile time.</span>
+int|float|double..int|float|double
+<span class="comment">// Calculated at run time.</span>
+int|float|double|<b>identifier</b>..int|float|double|<b>identifier</b>
+
+int data[] = 2..4; <span class="comment">// int data[] = [2, 3, 4];</span>
 </div>`
             }
 
             const links = document.getElementsByTagName("a");
             
+            function navigate(to)
+            {
+                let current = content[to];
+                if(current)
+                {
+                    documentation.innerHTML = current;
+                } else 
+                {
+                    documentation.innerHTML = "Oops! Looks like that page doesn't exist yet!";
+                }
+            }
+
             for(let i = 0; i < links.length; i++)
             {
                 links[i].addEventListener("click", e =>
                 {
                     e.preventDefault();
-                    const current = content[links[i].hash.replace("#", "")];
-                    if(current)
-                    {
-                        documentation.innerHTML = current;   
-                    } else 
-                    {
-                        documentation.innerHTML = "Oops! Looks like that page doesn't exist yet!";
-                    }
+                    navigate(links[i].hash.replace("#", ""));
                 });
             };
         </script>

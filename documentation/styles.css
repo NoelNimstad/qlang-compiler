@@ -82,6 +82,7 @@ a
     color: var(--link-color);
     text-decoration: underline 0px transparent;
     transition: 0.2s;
+    cursor: pointer;
 }
 
 a:hover 
