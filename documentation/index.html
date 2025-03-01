@@ -96,9 +96,15 @@ printf("%f", value); <span class="comment">// 1</span>
                 links[i].addEventListener("click", e =>
                 {
                     e.preventDefault();
+                    window.location.hash = links[i].hash.replace("#", "");
                     navigate(links[i].hash.replace("#", ""));
                 });
             };
+
+            if(window.location.hash)
+            {
+                navigate(window.location.hash.replace("#", ""));
+            }
         </script>
     </body>
 </html>
