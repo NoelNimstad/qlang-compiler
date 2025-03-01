@@ -1,13 +1,13 @@
 /*
     Name                    Representation  Priority
     ------------------------------------------------
-    TYPE_INT                int
-    IDENTIFIER(a)           a
-    OPERATOR_WEAK_ASSIGN    ?=
-    INT(21)                 21
-    OPERATOR_PLUS           +
-    INT(21)                 21
-    SEMI_COLON              ;
+    TYPE_INT                int             0
+    IDENTIFIER(a)           a               0
+    OPERATOR_WEAK_ASSIGN    ?=              3
+    INT(21)                 21              0
+    OPERATOR_PLUS           +               1
+    INT(21)                 21              0
+    SEMI_COLON              ;               0
 */
 
 #include "lexer.h"

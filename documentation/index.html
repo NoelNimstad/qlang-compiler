@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Qlang</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <main>
+            <h1>Qlang documentation</h1>
+            <p>Q (pronunced Queue) is a superset of the C programing language, which compiles back down to C.</p>
+            <div class="center">
+                <div class="table">
+                    <ul>
+                        <li><h3>Types</h3></li>
+                        <li><a href="#int">int</a></li>
+                        <li><a href="#float">float</a></li>
+                        <li><a href="#double">double</a></li>
+                        <li class="beta"><a href="#bool">bool</a></li>
+                    </ul>
+                    <ul>
+                        <li><h3>Operators</h3></li>
+                        <li><a href="#assign"> = (assign)</a></li>
+                        <li class="beta"><a href="#wequal"> ?= (wequal)</a></li>
+                        <li><a href="#equality"> == (equality)</a></li>
+                        <li><a href="#add"> + (add)</a></li>
+                        <li><a href="#subtract"> - (subtract)</a></li>
+                        <li><a href="#multiply"> * (multiply)</a></li>
+                        <li><a href="#divide"> / (divide)</a></li>
+                        <li class="planned"><a href="#spread"> .. (spread)</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="documentation"></div>
+        </main>
+        <script>
+            const documentation = document.getElementById("documentation");
+            const content =
+            {
+                wequal: `
+<h2>Opperator: ?= <span class="comment">/</span> wequal</h2>
+<p>The wequal operator functions identically to the normal assign operator except it defaults to a mutable variable.</p>
+<div class="code">int a = 0;
+int b ?= 0;
+
+<span class="error">a =</span> 1; <span class="comment">// Error, a is by default immutable</span>
+b = 1;
+</div>
+<p>The wequal operator is therefore identical to adding a @mut modifier.</p>
+<div class="code">int b ?= 0; <span class="comment">// @mut int b = 0;</span>
+</div>`
+            }
+
+            const links = document.getElementsByTagName("a");
+            
+            for(let i = 0; i < links.length; i++)
+            {
+                links[i].addEventListener("click", e =>
+                {
+                    e.preventDefault();
+                    const current = content[links[i].hash.replace("#", "")];
+                    if(current)
+                    {
+                        documentation.innerHTML = current;   
+                    } else 
+                    {
+                        documentation.innerHTML = "Oops! Looks like that page doesn't exist yet!";
+                    }
+                });
+            };
+        </script>
+    </body>
+</html>
