@@ -9,7 +9,7 @@
     <body>
         <main>
             <h1>Qlang documentation</h1>
-            <p>Q (pronunced Queue) is a superset of the C programing language with some additional features (such as immutability by default, @ modifiers and a module system) which then compiles back down to C.</p>
+            <p>Q (pronunced Queue) is a superset of the C programing language with some additional features (such as immutability by default, @ modifiers and a module system) which then compiles back down to C. This website uses the font Fira Code for ligatures because they look awsome. Non-ligaturized versions of operators and such are placed within parantheses if they look too different from their ligaturized version.</p>
             <div class="center">
                 <div class="table">
                     <ul>
@@ -27,11 +27,13 @@
                         <li><a href="#assign"> = (assign)</a></li>
                         <li class="beta"><a href="#wequal"> ?= (wequal)</a></li>
                         <li><a href="#equality"> == (equality)</a></li>
+                        <li><a href="#inequality"> != <span class="comment">(</span>!&ZeroWidthSpace;=<span class="comment">)</span> (inequality)</a></li>
                         <li><a href="#add"> + (add)</a></li>
                         <li><a href="#subtract"> - (subtract)</a></li>
                         <li><a href="#multiply"> * (multiply)</a></li>
                         <li><a href="#divide"> / (divide)</a></li>
                         <li class="planned"><a href="#spread"> .. (spread)</a></li>
+                        <li class="planned"><a href="#mutate"> =>= <span class="comment">(</span>=&ZeroWidthSpace;>&ZeroWidthSpace;=<span class="comment">)</span> (mutate)</a></li>
                         <li><h3>Macros</h3></li>
                         <li class="planned"><a href="#divide">#include</a></li>
                         <li class="planned"><a href="#divide">#import</a></li>
@@ -65,6 +67,13 @@ int|float|double..int|float|double
 int|float|double|<b>identifier</b>..int|float|double|<b>identifier</b>
 
 int data[] = 2..4; <span class="comment">// int data[] = [2, 3, 4];</span>
+</div>`,
+                mutate: `
+<h2>Operator: =>= <span class="comment">/</span> mutate</h2>
+<p>Applies a function to a variable and then assigns that value back to that same variable.</p>
+<div class="code">double value ?= 3.14159265358979;
+value =>= sin; <span class="comment">// value = sin(value);</span>
+printf("%f", value); <span class="comment">// 1</span>
 </div>`
             }
 
