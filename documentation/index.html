@@ -21,6 +21,7 @@
                         <li><h3>Modifiers</h3></li>
                         <li><a href="#mutable">@mut @mutable</a></li>
                         <li class="beta"><a href="#once">@once</a></li>
+                        <li class="planned"><a href="#export">@export</a></li>
                     </ul>
                     <ul>
                         <li><h3>Operators</h3></li>
@@ -33,10 +34,10 @@
                         <li><a href="#multiply"> * (multiply)</a></li>
                         <li><a href="#divide"> / (divide)</a></li>
                         <li class="planned"><a href="#spread"> .. (spread)</a></li>
-                        <li class="planned"><a href="#mutate"> =>= <span class="comment">(</span>=&ZeroWidthSpace;>&ZeroWidthSpace;=<span class="comment">)</span> (mutate)</a></li>
                         <li><h3>Macros</h3></li>
-                        <li class="planned"><a href="#divide">#include</a></li>
-                        <li class="planned"><a href="#divide">#import</a></li>
+                        <li class="planned"><a href="#include">#include</a></li>
+                        <li class="planned"><a href="#import">#import</a></li>
+                        <li class="planned"><a href="#module">#module</a></li>
                     </ul>
                 </div>
             </div>
@@ -55,12 +56,12 @@ int b ?= 0; <span class="comment">// Mutable</span>
 <span class="error">a =</span> 1; <span class="comment">// Error, a is by default immutable</span>
 b = 1; <span class="comment">// Ok</span>
 </div>
-<p>The wequal operator is therefore identical to adding a @mut modifier.</p>
+<p>The wequal operator is therefore identical to adding a <a onclick="navigate('mutable')">@mut</a> or <a onclick="navigate('mutable')">@mutable</a> modifier.</p>
 <div class="code">int b ?= 0; <span class="comment">// @mut int b = 0;</span>
 </div>`,
                 spread: `
 <h2>Operator: .. <span class="comment">/</span> spread</h2>
-<p>The spread operator generates an array of numbers between two values, with increment 1. The syntax is as follows:
+<p>The spread operator generates an array of numbers between two values, with increment 1. If the first number is greater than the second number, then the array will be in descending order. If both the numbers are the same, an array of 1 element will be made. The syntax is as follows:
 <div class="code"><span class="comment">// Calculated at compile time.</span>
 int|float|double..int|float|double
 <span class="comment">// Calculated at run time.</span>
@@ -68,13 +69,60 @@ int|float|double|<b>identifier</b>..int|float|double|<b>identifier</b>
 
 int data[] = 2..4; <span class="comment">// int data[] = [2, 3, 4];</span>
 </div>`,
-                mutate: `
-<h2>Operator: =>= <span class="comment">/</span> mutate</h2>
-<p>Applies a function to a variable and then assigns that value back to that same variable.</p>
-<div class="code">double value ?= 3.14159265358979;
-value =>= sin; <span class="comment">// value = sin(value);</span>
-printf("%f", value); <span class="comment">// 1</span>
-</div>`
+                once: `
+<h2>Modifier: @once</h2>
+<p>Ensures some scope is only run once. Not thread safe! See example usage below:</p>
+<div class="code">for(int i ?= 0; i < 3; i++)
+{
+    @once {
+        printf("Hello there from %d!\\n", i);
+    }
+    printf("%d\\n", i);
+}
+
+<span class="comment">/*
+    Hello there from 0!
+    0
+    1
+    2
+*/</span>
+</div>`,
+                export: `
+<h2>Modifier: @export</h2>
+<p>Marks some symbol for export in a <a onclick="navigate('module')">module</a>. If something isn't marked for export, then it won't be included in the generated header file, only in a C file.</p>
+<div class="code"><span class="comment">// queue.q</span>
+#module Queue
+
+@export int answer = 42;
+</div><br/>
+<div class="code"><span class="comment">// main.q</span>
+#import "queue.q"
+#include "stdio.h"
+
+printf("The answer to life is: %d\\n", Queue::answer); <span class="comment">// 42</span>
+</div>`,
+                mutable: `
+<h2>Modifier: @mut <span class="comment">or</span> @mutable</h2>
+<p>Marks something as mutable. By default everything in Q is a constant, unless marked with the mutable modifier or defined using the <a onclick="navigate('wequal')">wequal (?=) operator</a>.</p>
+<div class="code">float e = 2.7182818285f;\t<span class="comment">//In C:\t   const float e = 2.7182818285f;</span>
+@mut float pi = 3.1415926536f;\t\t<span class="comment">// float pi = 3.1415926536f;</span>
+@mutable float phi = 1.6180339888f;\t<span class="comment">// float phi = 1.6180339888f;</span>
+float tau ?= 6.2831853072f;\t\t<span class="comment">// float tau = 6.2831853072f;</span>
+</div>
+<p>Since the <a onclick="navigate('wequal')">wequal (?=) operator</a> cannot be used in cases such as function arguments, the mutable modifier has to be used if mutable function arguments are desired.
+<div class="code">void double(int *i)
+{
+    <span class="error">*i *=</span> 2; <span class="comment">// Error: i is constant by default.</span>
+}
+
+void tripple(@mut int *i)
+{
+    *i *= 3; <span class="comment">// Ok</span>
+}
+</div>`,
+                module: `
+<h2>Macro: #module</h2>
+<p>Marks file as a module.</p>`
             }
 
             const links = document.getElementsByTagName("a");
@@ -84,6 +132,7 @@ printf("%f", value); <span class="comment">// 1</span>
                 let current = content[to];
                 if(current)
                 {
+                    document.title = `Qlang - ${ to }`;
                     documentation.innerHTML = current;
                 } else 
                 {
