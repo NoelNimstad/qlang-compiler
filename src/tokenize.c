@@ -136,8 +136,7 @@ struct token *generateTokens(char *source)
         currentCharacter++;
     }
 
-    currentToken->type = TOKEN_END_OF_FILE;
-    currentToken++;
+    ADVANCE(currentToken, TOKEN_END_OF_FILE);
 
     return tokens;
 }
