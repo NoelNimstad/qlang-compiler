@@ -11,6 +11,7 @@ enum tokenType
     TOKEN_OPERATOR_ASSIGN,      // =
     TOKEN_OPERATOR_WEQUAL,      // ?= (non const)
     TOKEN_OPERATOR_SPREAD,      // .. e.g 2..5 => [2, 3, 4, 5]
+    TOKEN_OPERATOR_ADD,         // +
     TOKEN_SEMI_COLON,           // ;
     TOKEN_END_OF_FILE,          // \0
     TOKEN_LEFT_SQUARE_BRACKET,  // [

@@ -41,6 +41,9 @@ void debugPrintTokens(struct qlangStruct *qlang)
 			case TOKEN_RIGHT_SQUARE_BRACKET:
 				printf("RIGHT_SQUARE_BRACKET");
 				break;
+			case TOKEN_OPERATOR_ADD:
+				printf("OPERATOR_PLUS");
+				break;
 			default:
 				break;
 			}

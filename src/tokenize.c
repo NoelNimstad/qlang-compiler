@@ -1,5 +1,7 @@
 #include "tokenize.h"
 
+#define ADVANCE(_to, _ty) { (_to)->type = (_ty); (_to)++; };
+
 struct keywordEntry
 {
     char *string;
@@ -61,10 +63,9 @@ struct token *generateTokens(char *source)
                 currentToken->type = result->value;
             } else 
             {
-                currentToken->type = TOKEN_IDENTIFIER;
                 currentToken->value.string = strdup(buffer);
+                ADVANCE(currentToken, TOKEN_IDENTIFIER);
             }
-            currentToken++;
             free(buffer);
             continue;
         }
@@ -89,10 +90,9 @@ struct token *generateTokens(char *source)
             buffer[i] = '\0'; // Null terminate the string to avoid problems
 
             int value = atoi(buffer); // convert string buffer to integer
-            currentToken->type = TOKEN_VALUE_INT;
             currentToken->value.integer = value;
-
-            currentToken++;
+            
+            ADVANCE(currentToken, TOKEN_VALUE_INT);
             free(buffer);
             continue;
         }
@@ -100,40 +100,36 @@ struct token *generateTokens(char *source)
         switch(*currentCharacter)
         {
             case ';':
-                currentToken->type = TOKEN_SEMI_COLON;
-                currentToken++;
+                ADVANCE(currentToken, TOKEN_SEMI_COLON);
                 break;
             case '?':
                 if(PEEK(currentCharacter) == '=')
                 {
                     currentCharacter++;
-                    currentToken->type = TOKEN_OPERATOR_WEQUAL;
-                    currentToken++;
+                    ADVANCE(currentToken, TOKEN_OPERATOR_WEQUAL);
                 }
                 break;
             case '=':
-                currentToken->type = TOKEN_OPERATOR_ASSIGN;
-                currentToken++;
+                ADVANCE(currentToken, TOKEN_OPERATOR_ASSIGN);
                 break;
             case '.':
                 if(PEEK(currentCharacter) == '.')
                 {
                     currentCharacter++;
-                    currentToken->type = TOKEN_OPERATOR_SPREAD;
-                    currentToken++;
+                    ADVANCE(currentToken, TOKEN_OPERATOR_SPREAD);
                 }
                 break;
             case '[':
-                currentToken->type = TOKEN_LEFT_SQUARE_BRACKET;
-                currentToken++;
+                ADVANCE(currentToken, TOKEN_LEFT_SQUARE_BRACKET);
                 break;
             case ']':
-                currentToken->type = TOKEN_RIGHT_SQUARE_BRACKET;
-                currentToken++;
+                ADVANCE(currentToken, TOKEN_RIGHT_SQUARE_BRACKET);
+                break;
+            case '+':
+                ADVANCE(currentToken, TOKEN_OPERATOR_ADD);
                 break;
             default:
-                currentToken->type = TOKEN_ERROR;
-                currentToken++;
+                ADVANCE(currentToken, TOKEN_ERROR);
                 break;
         }
 
