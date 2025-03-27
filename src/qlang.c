@@ -8,11 +8,14 @@ void debugPrintTokens(struct qlangStruct *qlang)
 	for(struct token *currentToken = qlang->tokens; currentToken->type != TOKEN_END_OF_FILE; currentToken++)
 	{
 		i++;
-		printf("\t");
+		printf("%lu\t", currentToken->line);
 		switch(currentToken->type)
 		{
 			case TOKEN_TYPE_INT:
 				printf("TYPE_INT");
+				break;
+			case TOKEN_TYPE_UINT8:
+				printf("TYPE_UINT8");
 				break;
 			case TOKEN_IDENTIFIER:
 				printf("IDENTIFIER(%s)", currentToken->value.string);
@@ -24,7 +27,7 @@ void debugPrintTokens(struct qlangStruct *qlang)
 				printf("OPERATOR_WEAK_ASSIGN");
 				break;
 			case TOKEN_VALUE_INT:
-				printf("INT(%d)", currentToken->value.integer);
+				printf("INT(%s)", currentToken->value.string);
 				break;
 			case TOKEN_SEMI_COLON:
 				printf("SEMI_COLON");
@@ -44,6 +47,9 @@ void debugPrintTokens(struct qlangStruct *qlang)
 			case TOKEN_OPERATOR_ADD:
 				printf("OPERATOR_PLUS");
 				break;
+			case TOKEN_OPERATOR_PLUS_EQUALS:
+				printf("OPERATOR_PLUS_EQUALS");
+				break;
 			default:
 				break;
 			}
@@ -53,24 +59,65 @@ void debugPrintTokens(struct qlangStruct *qlang)
 	printf(COLOR_GREEN "\tEND_OF_FILE (%d tokens)\n" COLOR_RESET, i + 1);
 }
 
+void debugPrintNode(struct node *node, int depth)
+{
+	if(node == NULL) return;
+
+	for(int i = 0; i < depth; i++)
+	{
+		printf("|\t");
+	}
+
+	printf("| ");
+
+	switch(node->type)
+	{
+		case NODE_START_OF_PROGRAM:
+			printf("START_OF_PROGRAM\n");
+			break;
+		case NODE_TYPED_IDENTIFIER:
+			printf("TYPED_IDENTIFIER\n");
+			break;
+		case NODE_TYPE:
+			printf("TYPE(%d)\n", node->value.integer);
+			break;
+		case NODE_IDENTIFIER:
+			printf("IDENTIFIER(%s)\n", node->value.string);
+			break;
+		case NODE_VALUE_INTEGER:
+			printf("INT(%s)\n", node->value.string);
+			break;
+		case NODE_DECLARATION:
+			printf("DECLARATION\n");
+			break;
+		default:
+			printf("ERROR(%d)\n", node->type);
+			break;
+	}
+
+	debugPrintNode(node->left, depth + 1);
+	debugPrintNode(node->right, depth + 1);
+	debugPrintNode(node->next, depth);
+}
+
+void debugPrintNodes(struct qlangStruct *qlang)
+{
+	printf(COLOR_GREEN "Qlang debug " COLOR_RESET "(nodes):\n");
+	debugPrintNode(qlang->head, 0);
+	printf("| " COLOR_GREEN "END_OF_FILE\n");
+}
+
 void freeNode(struct node *head)
 {
     if(head == NULL) return;
-
-    if(head->children != NULL)
-    {
-        for(unsigned int i = 0; i < head->childCount; i++)
-        {
-            freeNode(head->children[i]);
-        }
-        free(head->children);
-    }
 
     if(head->type == NODE_VALUE_STRING && head->value.string != NULL)
     {
         free(head->value.string);
     }
 
+	free(head->left);
+	free(head->right);
     freeNode(head->next);
     free(head);
 }
@@ -91,9 +138,11 @@ void destroyQlangStruct(struct qlangStruct *qlang)
 	free(qlang->head);
 }
 
-void processFile(const char *path)
+void processFile(const char *path, unsigned char debugTokens, unsigned char debugNodes)
 {
     struct qlangStruct qlang;
+	qlang.debugTokens = debugTokens;
+	qlang.debugNodes = debugNodes;
 
     { // Read file
 		FILE *filePointer = fopen(path, "r");
@@ -114,7 +163,10 @@ void processFile(const char *path)
     }
 
 	qlang.tokens = generateTokens(qlang.fileContents);
-	debugPrintTokens(&qlang);
+	if(qlang.debugTokens) debugPrintTokens(&qlang);
+
+	qlang.head = generateAST(qlang.tokens);
+	if(qlang.debugNodes) debugPrintNodes(&qlang);
 
     destroyQlangStruct(&qlang);
 }

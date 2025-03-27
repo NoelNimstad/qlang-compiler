@@ -10,7 +10,8 @@ struct keywordEntry
 
 struct keywordEntry keywordTable[] = 
 {
-    "int", TOKEN_TYPE_INT
+    "int", TOKEN_TYPE_INT,
+    "uint8", TOKEN_TYPE_UINT8
 };
 
 int compare(const void *s1, const void *s2)
@@ -25,17 +26,22 @@ struct token *generateTokens(char *source)
 {
     SOFT_ASSERT(strlen(source) != 0, "Input string to tokenizer is empty.\n");
 
-    struct token *tokens = (struct token *)malloc(0xff * sizeof(struct token)); // Default to 255 tokens
+    struct token *tokens = (struct token *)malloc(255 * sizeof(struct token)); // Default to 255 tokens
     struct token *currentToken = tokens;
     char *currentCharacter = source;
 
+    unsigned long int line = 1;
     while(*currentCharacter != '\0')
     {
         if(isspace(*currentCharacter)) // Ignore spaces
         {
+            if(*currentCharacter == '\n') line++;
+
             currentCharacter++;
             continue;
         }
+
+        currentToken->line = line;
 
         if(isalpha(*currentCharacter) || *currentCharacter == '_') // Identifier or keyword
         {
@@ -60,7 +66,7 @@ struct token *generateTokens(char *source)
             result = bsearch(&key, keywordTable, sizeof(keywordTable) / sizeof(keywordTable[0]), sizeof(keywordTable[0]), compare);
             if(result) // Is keyword
             {
-                currentToken->type = result->value;
+                ADVANCE(currentToken, result->value);
             } else 
             {
                 currentToken->value.string = strdup(buffer);
@@ -89,8 +95,7 @@ struct token *generateTokens(char *source)
             }
             buffer[i] = '\0'; // Null terminate the string to avoid problems
 
-            int value = atoi(buffer); // convert string buffer to integer
-            currentToken->value.integer = value;
+            currentToken->value.string = strdup(buffer);
             
             ADVANCE(currentToken, TOKEN_VALUE_INT);
             free(buffer);
@@ -126,7 +131,35 @@ struct token *generateTokens(char *source)
                 ADVANCE(currentToken, TOKEN_RIGHT_SQUARE_BRACKET);
                 break;
             case '+':
-                ADVANCE(currentToken, TOKEN_OPERATOR_ADD);
+                if(PEEK(currentCharacter) == '=')
+                {
+                    ADVANCE(currentToken, TOKEN_OPERATOR_PLUS_EQUALS);
+                } else 
+                {
+                    ADVANCE(currentToken, TOKEN_OPERATOR_ADD);
+                }
+                break;
+            case '/':
+                if(PEEK(currentCharacter) == '/')
+                {
+                    currentCharacter++;
+                    while(PEEK(currentCharacter) != '\n' && PEEK(currentCharacter) != '\0')
+                    {
+                        currentCharacter++;
+                    }
+                } else if(PEEK(currentCharacter) == '*')
+                {
+                    currentCharacter++;
+
+                    unsigned int running = 1;
+                    while(running && PEEK(currentCharacter) != '\0')
+                    {
+                        if(*currentCharacter == '*' && PEEK(currentCharacter) == '/') running = 0;
+
+                        if(*currentCharacter == '\n') line++;
+                        currentCharacter++;
+                    }
+                }
                 break;
             default:
                 ADVANCE(currentToken, TOKEN_ERROR);

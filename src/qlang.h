@@ -8,12 +8,13 @@
 #include <ctype.h>
 #include "token.h"
 #include "tokenize.h"
-#include "lexer.h"
+#include "parser.h"
 
 // Qlang struct
 struct qlangStruct
 {
-    unsigned char debug;
+    unsigned char debugTokens;
+    unsigned char debugNodes;
     char *fileContents;
     unsigned int line, column;
     struct token *tokens;
@@ -42,12 +43,13 @@ struct qlangStruct
 
 // Debug
 void debugPrintTokens(struct qlangStruct *qlang);
+void debugPrintNodes(struct qlangStruct *qlang);
 
 // Cleanup
 void freeNode(struct node *head);
 void destroyQlangStruct(struct qlangStruct *qlang);
 
 // Main process (to process some file)
-void processFile(const char *path);
+void processFile(const char *path, unsigned char debugTokens, unsigned char debugNodes);
 
 #endif // QLANG_H
