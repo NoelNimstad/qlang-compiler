@@ -99,6 +99,9 @@ void debugPrintNode(struct node *node, int depth)
 		case NODE_ASSIGNMENT:
 			printf("ASSIGNMENT\n");
 			break;
+		case NODE_SEMI_COLON:
+			printf("SEMI_COLON\n");
+			break;
 		default:
 			printf("ERROR(%d)\n", node->type);
 			break;

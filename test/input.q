@@ -1,6 +1,7 @@
 /*
-    input.q
+   input.q
 */
 
-uint8 color ?= 510 + 2 / 2;
-color ?= 0;
+int a = 2 + 2 / 2;
+3+3
+a = 5;

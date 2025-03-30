@@ -23,6 +23,7 @@ enum nodeType
     NODE_OPERATOR,
     NODE_IDENTIFIER,
     NODE_ASSIGNMENT,
+    NODE_SEMI_COLON,
     NODE_TYPED_IDENTIFIER, // type identifier
     NODE_ERROR
 };
