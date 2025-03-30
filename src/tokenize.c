@@ -32,7 +32,7 @@ struct token *generateTokens(char *source)
     char *currentCharacter = source;
 
     unsigned long int line = 1;
-    while(*currentCharacter != '\0')
+    while(*currentCharacter != '\0') // as long as the next character isn't the end of the file
     {
         if(isspace(*currentCharacter)) // Ignore spaces
         {

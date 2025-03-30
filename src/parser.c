@@ -38,16 +38,6 @@ unsigned char tokenIsType(struct token token)
         || type == TOKEN_TYPE_UINT8;
 }
 
-void movePreviousNodeToLeft(struct node *node)
-{
-    node->previous->previous->next = node; // set previous node's previous node's next node to this node
-    node->left = node->previous;
-    node->previous = node->left->previous; // make this node's previous node be the moved down node's previous node
-
-    node->left->previous = NULL; // node which got moved down is no longer part of the linked list
-    node->left->next = NULL;
-}
-
 struct node *parseStatement(struct token **currentToken);
 struct node *parseDeclaration(struct token **currentToken);
 struct node *parseAssignment(struct token **currentToken);
@@ -118,17 +108,17 @@ struct node *parseExpression(struct token **currentToken)
     return expression;
 }
 
-struct node *parseAssignment(struct token **curentToken)
+struct node *parseAssignment(struct token **currentToken)
 {
-    struct node *assignment = parseExpression(curentToken);
+    struct node *assignment = parseExpression(currentToken);
 
-    while((*curentToken)->type == TOKEN_OPERATOR_ASSIGN)
+    while((*currentToken)->type == TOKEN_OPERATOR_ASSIGN)
     {
         struct node *assignmentNode = newNode(NODE_ASSIGNMENT);
         assignmentNode->left = assignment;
 
-        (*curentToken)++; // move past =
-        assignmentNode->right = parseExpression(curentToken);
+        (*currentToken)++; // move past =
+        assignmentNode->right = parseExpression(currentToken);
         
         assignment = assignmentNode;
     }
@@ -155,15 +145,17 @@ struct node *parseDeclaration(struct token **currentToken)
 
     (*currentToken)++;
 
-    ASSERT((*currentToken)->type == TOKEN_OPERATOR_WEQUAL
-        || (*currentToken)->type == TOKEN_OPERATOR_ASSIGN, "Expected = or ?= in declaration on line %lu.\n", (*currentToken)->line);
-    
-    (*currentToken)++;
-
     struct node *declaration = newNode(NODE_DECLARATION);
     declaration->left = typedIdentifier;
-    
-    declaration->right = parseExpression(currentToken);
+
+    if((*currentToken)->type != TOKEN_SEMI_COLON) // if we aren't just stating that some variable exists
+    {
+        ASSERT((*currentToken)->type == TOKEN_OPERATOR_WEQUAL
+            || (*currentToken)->type == TOKEN_OPERATOR_ASSIGN, "Expected = or ?= in declaration on line %lu.\n", (*currentToken)->line);
+
+        (*currentToken)++;
+        declaration->right = parseExpression(currentToken);
+    }
 
     return declaration;
 }
@@ -172,10 +164,10 @@ struct node *parseStatement(struct token **currentToken)
 {
     if(tokenIsType(**currentToken))
     {
-        return parseDeclaration(currentToken);
+        return parseDeclaration(currentToken); // function and variable declarations
     } else
     {
-        return parseAssignment(currentToken);
+        return parseAssignment(currentToken); // assignments (the highest precedence operator)
     }
 }
 
@@ -198,103 +190,3 @@ struct node *generateAST(struct token *tokens)
 
     return head;
 }
-
-// OLD CODE:
-
-// if(tokenIsType(*currentToken))
-// {
-//     if(PEEK(currentToken).type == TOKEN_IDENTIFIER) // typed identifier
-//     {
-//         /*
-//                 TYPED_IDENTIFIER
-//                     /          \
-//                 /            \
-//                 TYPE        IDENTIFIER
-//         */
-
-//         ADVANCE(tail, NODE_TYPED_IDENTIFIER); // typed identifier node
-
-//         tail->left = newNode(NODE_TYPE); // type node
-//         tail->left->type = NODE_TYPE;
-//         tail->left->value.integer = convertTokenTypeToNodeType(currentToken->type);
-
-//         currentToken++; // identifier node
-//         tail->right = newNode(NODE_IDENTIFIER);
-//         tail->right->type = NODE_IDENTIFIER;
-//         tail->right->value.string = currentToken->value.string;
-
-//         currentToken++;
-//         continue;
-//     } else 
-//     {
-//         ASSERT(0, "Expected identifier after type on line %lu.\n", currentToken->line);
-//         currentToken++;
-//     }
-// }
-
-// switch(currentToken->type)
-// {
-//     case TOKEN_VALUE_INT:
-//     {
-//         ADVANCE(tail, NODE_VALUE_INTEGER);
-//         tail->value.string = currentToken->value.string;
-//         break;
-//     }
-//     case TOKEN_OPERATOR_WEQUAL:
-//     {
-//         if(tail->type == NODE_TYPED_IDENTIFIER) // new declaration
-//         {
-//             /*        
-//                         @mut DECLARATION
-//                         /              \
-//                         /                \
-//                     TYPED_IDENTIFIER    EXPRESSION
-//             */
-
-//             ADVANCE(tail, NODE_DECLARATION);
-//             movePreviousNodeToLeft(tail);
-
-//             currentToken++; // move past ?=
-
-//             tail->right = parseExpression(&currentToken);
-//         } else 
-//         {
-//             SOFT_ASSERT(0, "?= used for a normal assignment on line %lu.\n", currentToken->line);
-
-//             ADVANCE(tail, NODE_ASSIGNMENT);
-//             movePreviousNodeToLeft(tail);
-
-//             currentToken++; // move past ?=
-
-//             tail->right = parseExpression(&currentToken);
-//         }
-//         break;
-//     }
-//     case TOKEN_IDENTIFIER:
-//     {
-//         ADVANCE(tail, NODE_IDENTIFIER);
-//         tail->value.string = currentToken->value.string;
-//         break;
-//     }
-//     case TOKEN_OPERATOR_ASSIGN:
-//     {
-//         ADVANCE(tail, NODE_ASSIGNMENT);
-//         movePreviousNodeToLeft(tail);
-
-//         currentToken++; // move past =
-
-//         tail->right = parseExpression(&currentToken);
-//         break;
-//     }
-//     case TOKEN_SEMI_COLON:
-//     {
-//         ADVANCE(tail, NODE_SEMI_COLON);
-//         break;
-//     }
-//     default: 
-//     {
-//         break;
-//     }
-// }
-
-// currentToken++;
