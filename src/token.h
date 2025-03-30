@@ -10,9 +10,12 @@ enum tokenType
     TOKEN_VALUE_INT,            // Integer value, e.g -2, 0, 2
     TOKEN_IDENTIFIER,           // Identifiers / Names
     TOKEN_OPERATOR_ASSIGN,      // =
+    TOKEN_OPERATOR_MULTIPLY,    // *
+    TOKEN_OPERATOR_DIVIDE,      // /
     TOKEN_OPERATOR_WEQUAL,      // ?= (non const)
     TOKEN_OPERATOR_SPREAD,      // .. e.g 2..5 => [2, 3, 4, 5]
     TOKEN_OPERATOR_ADD,         // +
+    TOKEN_OPERATOR_SUBTRACT,    // -
     TOKEN_OPERATOR_PLUS_EQUALS, // +=
     TOKEN_SEMI_COLON,           // ;
     TOKEN_END_OF_FILE,          // \0

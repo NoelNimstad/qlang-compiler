@@ -20,7 +20,9 @@ enum nodeType
     NODE_VALUE_STRING, // string value
     NODE_VALUE_INTEGER, // integer literal
     NODE_DECLARATION,
+    NODE_OPERATOR,
     NODE_IDENTIFIER,
+    NODE_ASSIGNMENT,
     NODE_TYPED_IDENTIFIER, // type identifier
     NODE_ERROR
 };

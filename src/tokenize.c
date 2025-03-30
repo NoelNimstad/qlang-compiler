@@ -1,6 +1,7 @@
 #include "tokenize.h"
 
 #define ADVANCE(_to, _ty) { (_to)->type = (_ty); (_to)++; };
+#define ADVANCE_WITH_STRING(_to, _ty, _s) { (_to)->value.string = (_s); ADVANCE((_to), (_ty)); };
 
 struct keywordEntry
 {
@@ -136,18 +137,18 @@ struct token *generateTokens(char *source)
                     ADVANCE(currentToken, TOKEN_OPERATOR_PLUS_EQUALS);
                 } else 
                 {
-                    ADVANCE(currentToken, TOKEN_OPERATOR_ADD);
+                    ADVANCE_WITH_STRING(currentToken, TOKEN_OPERATOR_ADD, "+")
                 }
                 break;
             case '/':
-                if(PEEK(currentCharacter) == '/')
+                if(PEEK(currentCharacter) == '/') // comment
                 {
                     currentCharacter++;
                     while(PEEK(currentCharacter) != '\n' && PEEK(currentCharacter) != '\0')
                     {
                         currentCharacter++;
                     }
-                } else if(PEEK(currentCharacter) == '*')
+                } else if(PEEK(currentCharacter) == '*') // multiline comment
                 {
                     currentCharacter++;
 
@@ -159,6 +160,9 @@ struct token *generateTokens(char *source)
                         if(*currentCharacter == '\n') line++;
                         currentCharacter++;
                     }
+                } else // division
+                {
+                    ADVANCE_WITH_STRING(currentToken, TOKEN_OPERATOR_DIVIDE, "/");
                 }
                 break;
             default:

@@ -38,6 +38,9 @@ void debugPrintTokens(struct qlangStruct *qlang)
 			case TOKEN_OPERATOR_SPREAD:
 				printf("OPERATOR_SPREAD");
 				break;
+			case TOKEN_OPERATOR_DIVIDE:
+				printf("OPERATOR_DIVIDE");
+				break;
 			case TOKEN_LEFT_SQUARE_BRACKET:
 				printf("LEFT_SQUARE_BRACKET");
 				break;
@@ -89,6 +92,12 @@ void debugPrintNode(struct node *node, int depth)
 			break;
 		case NODE_DECLARATION:
 			printf("DECLARATION\n");
+			break;
+		case NODE_OPERATOR:
+			printf("OPERATOR(%s)\n", node->value.string);
+			break;
+		case NODE_ASSIGNMENT:
+			printf("ASSIGNMENT\n");
 			break;
 		default:
 			printf("ERROR(%d)\n", node->type);

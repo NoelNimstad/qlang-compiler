@@ -48,6 +48,69 @@ void movePreviousNodeToLeft(struct node *node)
     node->left->next = NULL;
 }
 
+struct node *parseFactor(struct token **currentToken)
+{
+    struct node *factor = NULL;
+
+    if((*currentToken)->type == TOKEN_VALUE_INT)
+    {
+        factor = newNode(NODE_VALUE_INTEGER);
+        factor->value.string = (*currentToken)->value.string;
+    }
+    else if((*currentToken)->type == TOKEN_IDENTIFIER)
+    {
+        factor = newNode(NODE_IDENTIFIER);
+        factor->value.string = (*currentToken)->value.string;
+    }
+    else
+    {
+        ASSERT(0, "Unexpected token in expression on line %lu.\n", (*currentToken)->line);
+    }
+
+    *currentToken = (*currentToken) + 1; // move to the next token
+    return factor;
+}
+
+struct node *parseTerm(struct token **currentToken)
+{
+    struct node *term = parseFactor(currentToken);
+
+    while((*currentToken)->type == TOKEN_OPERATOR_MULTIPLY ||
+          (*currentToken)->type == TOKEN_OPERATOR_DIVIDE)
+    {
+        struct node *operatorNode = newNode(NODE_OPERATOR);
+        operatorNode->value.string = (*currentToken)->value.string;
+        operatorNode->left = term;
+
+        *currentToken = (*currentToken) + 1;
+        operatorNode->right = parseFactor(currentToken);
+
+        term = operatorNode;
+    }
+
+    return term;
+}
+
+struct node *parseExpression(struct token **currentToken)
+{
+    struct node *expression = parseTerm(currentToken);
+
+    while((*currentToken)->type == TOKEN_OPERATOR_ADD ||
+          (*currentToken)->type == TOKEN_OPERATOR_SUBTRACT)
+    {
+        struct node *operatorNode = newNode(NODE_OPERATOR);
+        operatorNode->value.string = (*currentToken)->value.string; // store the operator as a string
+        operatorNode->left = expression;
+
+        *currentToken = (*currentToken) + 1; // move past operator
+        operatorNode->right = parseTerm(currentToken);
+
+        expression = operatorNode; // update expression to be the new root
+    }
+
+    return expression;
+}
+
 struct node *generateAST(struct token *tokens)
 {
     struct token *currentToken = tokens;
@@ -108,9 +171,20 @@ struct node *generateAST(struct token *tokens)
                     
                     ADVANCE(tail, NODE_DECLARATION);
                     movePreviousNodeToLeft(tail);
+
+                    currentToken++; // move past ?=
+
+                    tail->right = parseExpression(&currentToken);
                 } else 
                 {
                     SOFT_ASSERT(0, "?= used for a normal assignment on line %lu.\n", currentToken->line);
+
+                    ADVANCE(tail, NODE_ASSIGNMENT);
+                    movePreviousNodeToLeft(tail);
+    
+                    currentToken++; // move past ?=
+    
+                    tail->right = parseExpression(&currentToken);
                 }
                 break;
             }
@@ -118,6 +192,16 @@ struct node *generateAST(struct token *tokens)
             {
                 ADVANCE(tail, NODE_IDENTIFIER);
                 tail->value.string = currentToken->value.string;
+                break;
+            }
+            case TOKEN_OPERATOR_ASSIGN:
+            {
+                ADVANCE(tail, NODE_ASSIGNMENT);
+                movePreviousNodeToLeft(tail);
+
+                currentToken++; // move past =
+
+                tail->right = parseExpression(&currentToken);
                 break;
             }
             default: 
