@@ -43,7 +43,6 @@ struct node
     } value;
 };
 
-struct node *newNode(enum nodeType type);
 struct node *generateAST(struct token *tokens);
 
 #endif
