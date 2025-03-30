@@ -116,7 +116,7 @@ struct token *generateTokens(char *source)
                 }
                 break;
             case '=':
-                ADVANCE(currentToken, TOKEN_OPERATOR_ASSIGN);
+                ADVANCE_WITH_STRING(currentToken, TOKEN_OPERATOR_ASSIGN, "=");
                 break;
             case '.':
                 if(PEEK(currentCharacter) == '.')

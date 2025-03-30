@@ -1,6 +1,7 @@
 #include "parser.h"
 
-#define ADVANCE(_n, _t) { (_n)->next = newNode((_t)); (_n)->next->previous = (_n); (_n) = (_n)->next; };
+#define ADVANCE_NODE(_n, _t) { (_n)->next = newNode((_t)); (_n)->next->previous = (_n); (_n) = (_n)->next; };
+#define ADVANCE_TOKEN(_p) { (*(_p))++; };
 
 struct node *newNode(enum nodeType type)
 {
@@ -64,7 +65,7 @@ struct node *parseFactor(struct token **currentToken)
         ASSERT(0, "Unexpected token in expression on line %lu.\n", (*currentToken)->line);
     }
 
-    (*currentToken)++; // move to the next token
+    ADVANCE_TOKEN(currentToken); // move to the next token
     return factor;
 }
 
@@ -79,7 +80,7 @@ struct node *parseTerm(struct token **currentToken)
         operatorNode->value.string = (*currentToken)->value.string;
         operatorNode->left = term;
 
-        (*currentToken)++;
+        ADVANCE_TOKEN(currentToken);
         operatorNode->right = parseFactor(currentToken);
 
         term = operatorNode;
@@ -99,7 +100,7 @@ struct node *parseExpression(struct token **currentToken)
         operatorNode->value.string = (*currentToken)->value.string; // store the operator as a string
         operatorNode->left = expression;
 
-        (*currentToken)++; // move past operator
+        ADVANCE_TOKEN(currentToken); // move past operator
         operatorNode->right = parseTerm(currentToken);
 
         expression = operatorNode; // update expression to be the new root
@@ -110,20 +111,22 @@ struct node *parseExpression(struct token **currentToken)
 
 struct node *parseAssignment(struct token **currentToken)
 {
-    struct node *assignment = parseExpression(currentToken);
+    struct node *left = parseExpression(currentToken);
 
-    while((*currentToken)->type == TOKEN_OPERATOR_ASSIGN)
+    if((*currentToken)->type == TOKEN_OPERATOR_ASSIGN)
     {
-        struct node *assignmentNode = newNode(NODE_ASSIGNMENT);
-        assignmentNode->left = assignment;
+        struct node *assignmentNode = newNode(NODE_OPERATOR);
+        assignmentNode->value.string = (*currentToken)->value.string;
+        assignmentNode->left = left;
 
-        (*currentToken)++; // move past =
-        assignmentNode->right = parseExpression(currentToken);
-        
-        assignment = assignmentNode;
+        ADVANCE_TOKEN(currentToken); // move past =
+
+        assignmentNode->right = parseAssignment(currentToken); // recursively parse the right-hand side
+
+        return assignmentNode;
     }
 
-    return assignment;
+    return left; // if there are no assignments, return the expression node
 }
 
 struct node *parseDeclaration(struct token **currentToken)
@@ -136,14 +139,14 @@ struct node *parseDeclaration(struct token **currentToken)
     typedIdentifier->left->type = NODE_TYPE;
     typedIdentifier->left->value.integer = convertTokenTypeToNodeType((*currentToken)->type);
     
-    (*currentToken)++;
+    ADVANCE_TOKEN(currentToken);
     ASSERT((*currentToken)->type == TOKEN_IDENTIFIER, "Expected identifier after type on line %lu.\n", (*currentToken)->line);
 
     typedIdentifier->right = newNode(NODE_IDENTIFIER);
     typedIdentifier->right->type = NODE_IDENTIFIER;
     typedIdentifier->right->value.string = (*currentToken)->value.string;
 
-    (*currentToken)++;
+    ADVANCE_TOKEN(currentToken);
 
     struct node *declaration = newNode(NODE_DECLARATION);
     declaration->left = typedIdentifier;
@@ -153,7 +156,7 @@ struct node *parseDeclaration(struct token **currentToken)
         ASSERT((*currentToken)->type == TOKEN_OPERATOR_WEQUAL
             || (*currentToken)->type == TOKEN_OPERATOR_ASSIGN, "Expected = or ?= in declaration on line %lu.\n", (*currentToken)->line);
 
-        (*currentToken)++;
+        ADVANCE_TOKEN(currentToken);
         declaration->right = parseExpression(currentToken);
     }
 
@@ -167,7 +170,7 @@ struct node *parseStatement(struct token **currentToken)
         return parseDeclaration(currentToken); // function and variable declarations
     } else
     {
-        return parseAssignment(currentToken); // assignments (the highest precedence operator)
+        return parseAssignment(currentToken); // assignments (the lowest precedence operator)
     }
 }
 
